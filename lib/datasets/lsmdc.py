@@ -117,19 +117,8 @@ class coco(imdb):
         """
         # Example image path for index=119993:
         #   images/train2014/COCO_train2014_000000119993.jpg
-        if 'lsmdc' in self._image_set:
-            file_name = (str(index).zfill(9) + ':kf1.jpg')
-        elif 'vtt' in self._image_set:
-            file_name = (str(index).zfill(4) + ':kf1.jpg')
-        elif 'sbugaze' in self._image_set:
-            file_name = ('2008_'+str(index).zfill(6) + '.jpg')
-        elif 'yle' in self._image_set:
-            file_name = (str(int(index//1e6))+':'+str(int(index%1e6))+ '.jpeg')
-        elif 'social' in self._image_set:
-            file_name = osp.join(self._image_set.split('-')[-1], index+'.jpg' )
-        else:
-            file_name = ('COCO_' + self._data_name + '_' +
-                         str(index).zfill(12) + '.jpg')
+        file_name = ('COCO_' + self._data_name + '_' +
+                     str(index).zfill(12) + '.jpg')
         image_path = osp.join(self._data_path, 'images',
                               self._data_name, file_name)
         assert osp.exists(image_path), \

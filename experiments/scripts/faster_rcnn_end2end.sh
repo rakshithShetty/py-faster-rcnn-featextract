@@ -4,7 +4,7 @@
 # DATASET is either pascal_voc or coco.
 #
 # Example:
-# ./experiments/scripts/faster_rcnn_end2end.sh 0 VGG_CNN_M_1024 pascal_voc \
+# ./experiments/scripts/faster_rcnn_end2end.sh 0 VGG_CNN_M_1024 pascal_voc weights \
 #   --set EXP_DIR foobar RNG_SEED 42 TRAIN.SCALES "[400, 500, 600, 700]"
 
 set -x
@@ -16,10 +16,15 @@ GPU_ID=$1
 NET=$2
 NET_lc=${NET,,}
 DATASET=$3
+if [ "$4" != "0" ]; then
+    Weights=$4
+else
+    Weights=data/imagenet_models/${NET}.v2.caffemodel
+fi
 
 array=( $@ )
 len=${#array[@]}
-EXTRA_ARGS=${array[@]:3:$len}
+EXTRA_ARGS=${array[@]:4:$len}
 EXTRA_ARGS_SLUG=${EXTRA_ARGS// /_}
 
 case $DATASET in
@@ -36,7 +41,7 @@ case $DATASET in
     TRAIN_IMDB="coco_2014_train"
     TEST_IMDB="coco_2014_minival"
     PT_DIR="coco"
-    ITERS=490000
+    ITERS=290000
     ;;
   *)
     echo "No dataset given"
@@ -50,7 +55,7 @@ echo Logging output to "$LOG"
 
 time ./tools/train_net.py --gpu ${GPU_ID} \
   --solver models/${PT_DIR}/${NET}/faster_rcnn_end2end/solver.prototxt \
-  --weights data/imagenet_models/${NET}.v2.caffemodel \
+  --weights ${Weights} \
   --imdb ${TRAIN_IMDB} \
   --iters ${ITERS} \
   --cfg experiments/cfgs/faster_rcnn_end2end.yml \
