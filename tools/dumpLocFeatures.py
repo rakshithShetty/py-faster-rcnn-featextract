@@ -48,8 +48,26 @@ def dump_clasDetFeat(dets, imdb, coco2imgid, args, max_idx):
 
   for ann in dets:
     cid = catToIdx[ann['category_id']]
-    if ann['score'] > spatMap[coco2imgid[ann['image_id']]][cid]:
-        spatMap[coco2imgid[ann['image_id']]][cid] = ann['score']
+    imgid = ann['image_id']
+    print(imgid)
+    m = re.search('/(\d+)(.*)?\.jpg', imgid)
+    if m:
+      imgid = m.group(1)
+    else:
+      m = re.search('/.+_(\d+)\.jpg', imgid)
+      if m:
+        imgid = m.group(1)
+      else:
+        m = re.search('(\d+:\d+)\.jpeg', imgid)
+        if m:
+          imgid = m.group(1)
+    # wmt18:
+    # imgid = coco2imgid[int(imgid)]
+    imgid = coco2imgid[imgid]
+    print(imgid)
+   
+    if ann['score'] > spatMap[imgid][cid]:
+        spatMap[imgid][cid] = ann['score']
   
   spatMapSmall = spatMap.astype(np.float16)
   np.save(open(args.resFile,'wb'),spatMapSmall)
@@ -114,13 +132,30 @@ def dump_spatMapFeat(detDict, imdb, coco2imgid, args, max_idx):
             ov_y = [min(bC[3],gridRectCord[i][3]), max(bC[1],gridRectCord[i][1])]
             sI = max(0, ov_x[0] - ov_x[1]) * max(0, ov_y[0] - ov_y[1])
             if sI > 0:
-                if args.use_gauss_weight == 0:
+              imgid = ann['image_id']
+              print(imgid)
+              m = re.search('/(\d+)(.*)?\.jpg', imgid)
+              if m:
+                imgid = m.group(1)
+              else:
+                m = re.search('/.+_(\d+)\.jpg', imgid)
+                if m:
+                  imgid = m.group(1)
+                else:
+                  m = re.search('(\d+:\d+)\.jpeg', imgid)
+                  if m:
+                    imgid = m.group(1)
+              # wmt18
+              #imgid = coco2imgid[int(imgid)]
+              imgid = coco2imgid[imgid]
+              print(imgid)
+              if args.use_gauss_weight == 0:
                     sU = gridA[i] + bA - sI
                     assert(sU>sI)
-                    spatMap[coco2imgid[ann['image_id']]][cid][i] += (ann['score'] ** args.scale_by_det) * sI/sU
-                else:
+                    spatMap[imgid][cid][i] += (ann['score'] ** args.scale_by_det) * sI/sU
+              else:
                     #print ov_x, ov_y, gM, gS
-                    spatMap[coco2imgid[ann['image_id']]][cid][i] += (ann['score'] ** args.scale_by_det)* integs.dblquad(
+                    spatMap[imgid][cid][i] += (ann['score'] ** args.scale_by_det)* integs.dblquad(
                         gauss2d, ov_x[1], ov_x[0], lambda x:ov_y[1],
                         lambda x: ov_y[0], (gM,gS))[0]
     if im_ind % 500 == 1:
@@ -195,13 +230,23 @@ if __name__ == '__main__':
     lbls = open(args.labels,'r').read().splitlines()
     coco2imgid = {}
     for lb in lbls:
+        print(lb)
         lbParts = lb.split()
         lbParts[1] = lbParts[1][1:-1]
-        if (len(lbParts[1].split(':')) == 1):
-            if args.featfromlbl == '':
-                coco2imgid[int(lbParts[1])] = int(lbParts[0][1:])
-        elif re.match(args.featfromlbl,lbParts[1].split(':')[1]):
-                coco2imgid[int(lbParts[1].split(':')[0])] = int(lbParts[0][1:])
+        print(lbParts[1], int(lbParts[0][1:]))
+        coco2imgid[lbParts[1]] = int(lbParts[0][1:])
+        
+# wmt18:
+#        while lbParts[1][0]=='0':
+#          lbParts[1] = lbParts[1][1:]
+#        #print(int(lbParts[1]), int(lbParts[0][1:]))
+#        coco2imgid[int(lbParts[1])] = int(lbParts[0][1:])
+# original:
+#        if (len(lbParts[1].split(':')) == 1):
+#            if args.featfromlbl == '':
+#                coco2imgid[int(lbParts[1])] = int(lbParts[0][1:])
+#        elif re.match(args.featfromlbl,lbParts[1].split(':')[1]):
+#                coco2imgid[int(lbParts[1].split(':')[0])] = int(lbParts[0][1:])
     #import pdb;pdb.set_trace()
     
     CONF_THRESH = 0.8
