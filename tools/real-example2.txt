@@ -1,0 +1,11 @@
+#
+def=/full-or-relative-path-to/models/coco/VGG16/faster_rcnn_end2end/test.prototxt
+net=/full-or-relative-path-to/trainedModels/coco80Cls_vgg16_faster_rcnn_iter_290000.caffemodel
+cfg=/full-or-relative-path-to/experiments/cfgs/faster_rcnn_end2end.yml
+
+26 /u/79/lariah1/unix/picsom/python/py-faster-rcnn-featextract/data/coco/images/test-smb2015/0:6469.jpeg 672 384
+70 /u/79/lariah1/unix/picsom/python/py-faster-rcnn-featextract/data/coco/images/test-smb2015/0:57510.jpeg 672 384
+144 /u/79/lariah1/unix/picsom/python/py-faster-rcnn-featextract/data/coco/images/test-smb2015/0:75608.jpeg 672 384
+270 /u/79/lariah1/unix/picsom/python/py-faster-rcnn-featextract/data/coco/images/test-smb2015/0:31307.jpeg 672 384
+395 /u/79/lariah1/unix/picsom/python/py-faster-rcnn-featextract/data/coco/images/test-smb2015/0:107982.jpeg 672 384
+664 /u/79/lariah1/unix/picsom/python/py-faster-rcnn-featextract/data/coco/images/test-smb2015/0:49692.jpeg 672 384

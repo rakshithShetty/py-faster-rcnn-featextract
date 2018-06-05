@@ -27,7 +27,8 @@ for year in ['2014']:
 
 # Set up coco_2015_<split>
 for year in ['2015']:
-    for split in ['test', 'test-dev', 'test-lsmdc-kf', 'test-msrvtt-kf', 'test-sbugaze', 'test-yle', 'test-social-img']:
+    for split in ['test', 'test-dev', 'test-lsmdc-kf', 'test-msrvtt-kf', 'test-sbugaze',
+                  'test-yle', 'test-social-img', 'test-wmt18', 'test-smb']:
         name = 'coco_{}_{}'.format(year, split)
         __sets[name] = (lambda split=split, year=year: coco(split, year))
 

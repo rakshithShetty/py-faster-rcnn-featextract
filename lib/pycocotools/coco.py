@@ -74,7 +74,7 @@ class COCO:
         self.imgs = {}
         self.cats = {}
         if not annotation_file == None:
-            print 'loading annotations into memory...'
+            print 'loading annotations into memory from', annotation_file
             tic = time.time()
             dataset = json.load(open(annotation_file, 'r'))
             print 'Done (t=%0.2fs)'%(time.time()- tic)

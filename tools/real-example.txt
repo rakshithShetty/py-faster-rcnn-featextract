@@ -1,0 +1,11 @@
+#
+def=/full-or-relative-path-to/models/coco/VGG16/faster_rcnn_end2end/test.prototxt
+net=/full-or-relative-path-to/trainedModels/coco80Cls_vgg16_faster_rcnn_iter_290000.caffemodel
+cfg=/full-or-relative-path-to/experiments/cfgs/faster_rcnn_end2end.yml
+
+26 /full-or-relative-path-to/0:25.jpeg 672 384
+70 /full-or-relative-path-to/0:69.jpeg 672 384
+144 /full-or-relative-path-to/0:143.jpeg 672 384
+270 /full-or-relative-path-to/0:269.jpeg 672 384
+395 /full-or-relative-path-to/0:394.jpeg 672 384
+664 /full-or-relative-path-to/0:663.jpeg 672 384

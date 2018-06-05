@@ -18,6 +18,9 @@ from fast_rcnn.nms_wrapper import nms
 import cPickle
 from utils.blob import im_list_to_blob
 import os
+import json
+import os.path as osp
+import uuid
 
 def _get_image_blob(im):
     """Converts an image into a network input.
@@ -226,6 +229,7 @@ def apply_nms(all_boxes, thresh):
 
 def test_net(net, imdb, max_per_image=100, thresh=0.05, vis=False):
     """Test a Fast R-CNN network on an image database."""
+    print(imdb.num_classes)
     num_images = len(imdb.image_index)
     # all detections are collected into:
     #    all_boxes[cls][image] = N x 5 array of detections in
@@ -293,3 +297,141 @@ def test_net(net, imdb, max_per_image=100, thresh=0.05, vis=False):
 
     print 'Evaluating detections'
     imdb.evaluate_detections(all_boxes, output_dir)
+
+    return output_dir
+
+
+def test_net_new(net, imdb, imgs, output_dir, max_per_image=100, thresh=0.05, vis=False):
+    """Test a Fast R-CNN network on an image database."""
+    num_images = len(imgs['images'])
+    imgs['classes'] = [i['name'] for i in imgs['categories']]
+    imgs['classes'].insert(0, '__background__')
+    num_classes = len(imgs['classes'])
+    imgs['class_to_cat_id'] = {img['name']: img['id'] for img in imgs['categories']}
+    print(num_classes)
+    # all detections are collected into:
+    #    all_boxes[cls][image] = N x 5 array of detections in
+    #    (x1, y1, x2, y2, score)
+    all_boxes = [[[] for _ in xrange(num_images)]
+                 for _ in xrange(num_classes)]
+
+    # timers
+    _t = {'im_detect' : Timer(), 'misc' : Timer()}
+
+    if not cfg.TEST.HAS_RPN:
+        roidb = imdb.roidb
+
+    for i, im_dict in enumerate(imgs['images']):
+        # filter out any ground truth boxes
+        if cfg.TEST.HAS_RPN:
+            box_proposals = None
+        else:
+            # The roidb may contain ground-truth rois (for example, if the roidb
+            # comes from the training or val split). We only want to evaluate
+            # detection on the *non*-ground-truth rois. We select those the rois
+            # that have the gt_classes field set to 0, which means there's no
+            # ground truth.
+            box_proposals = roidb[i]['boxes'][roidb[i]['gt_classes'] == 0]
+
+        im = cv2.imread(im_dict['image_id'])
+        _t['im_detect'].tic()
+        scores, boxes = im_detect(net, im, box_proposals)
+        _t['im_detect'].toc()
+
+        _t['misc'].tic()
+        # skip j = 0, because it's the background class
+        for j in xrange(1, num_classes):
+            inds = np.where(scores[:, j] > thresh)[0]
+            cls_scores = scores[inds, j]
+            cls_boxes = boxes[inds, j*4:(j+1)*4]
+            cls_dets = np.hstack((cls_boxes, cls_scores[:, np.newaxis])) \
+                .astype(np.float32, copy=False)
+            keep = nms(cls_dets, cfg.TEST.NMS)
+            cls_dets = cls_dets[keep, :]
+            if vis:
+                vis_detections(im, imgs['classes'][j], cls_dets)
+            all_boxes[j][i] = cls_dets
+
+        # Limit to max_per_image detections *over all classes*
+        if max_per_image > 0:
+            image_scores = np.hstack([all_boxes[j][i][:, -1]
+                                      for j in xrange(1, num_classes)])
+            if len(image_scores) > max_per_image:
+                image_thresh = np.sort(image_scores)[-max_per_image]
+                for j in xrange(1, num_classes):
+                    keep = np.where(all_boxes[j][i][:, -1] >= image_thresh)[0]
+                    all_boxes[j][i] = all_boxes[j][i][keep, :]
+        _t['misc'].toc()
+
+        print 'im_detect: {:d}/{:d} {:.3f}s {:.3f}s' \
+              .format(i + 1, num_images, _t['im_detect'].average_time,
+                      _t['misc'].average_time)
+
+    det_file = os.path.join(output_dir, 'detections.pkl')
+    with open(det_file, 'wb') as f:
+        cPickle.dump(all_boxes, f, cPickle.HIGHEST_PROTOCOL)
+
+    print 'Evaluating detections'
+    #imdb.evaluate_detections(all_boxes, output_dir)
+    output_file = evaluate_detections(imgs, all_boxes, output_dir)
+
+    return output_file
+
+
+def _coco_results_one_category(imgs, boxes, cat_id):
+    results = []
+    for im_ind, imim in enumerate(imgs['images']):
+        index = imim['id']
+        dets = boxes[im_ind].astype(np.float)
+        if dets.size == 0 or dets == []:
+            continue
+        scores = dets[:, -1]
+        xs = dets[:, 0]
+        ys = dets[:, 1]
+        ws = dets[:, 2] - xs + 1
+        hs = dets[:, 3] - ys + 1
+        results.extend(
+          [{'image_id' : index,
+            'category_id' : cat_id,
+            'bbox' : [xs[k], ys[k], ws[k], hs[k]],
+            'score' : scores[k]} for k in xrange(dets.shape[0])])
+    return results
+
+
+def _write_coco_results_file(imgs, all_boxes, res_file):
+    # [{"image_id": 42,
+    #   "category_id": 18,
+    #   "bbox": [258.15,41.29,348.26,243.78],
+    #   "score": 0.236}, ...]
+    num_classes = len(imgs['classes'])
+    results = []
+    for cls_ind, cls in enumerate(imgs['classes']):
+        if cls == '__background__':
+            continue
+        print 'Collecting {} results ({:d}/{:d})'.format(cls, cls_ind,
+                                                      num_classes - 1)
+        coco_cat_id = imgs['class_to_cat_id'][cls]
+        results.extend(_coco_results_one_category(imgs, all_boxes[cls_ind],
+                                                       coco_cat_id))
+    print 'Writing results json to {}'.format(res_file)
+    with open(res_file, 'w') as fid:
+        json.dump(results, fid)
+
+
+def evaluate_detections(imgs, all_boxes, output_dir):
+    res_file = osp.join(output_dir, ('detections_' +
+                                     #self._image_set +
+                                     #self._year +
+                                     '_results'))
+    #if self.config['use_salt']:
+    #    res_file += '_{}'.format(str(uuid.uuid4()))
+    res_file += '.json'
+    _write_coco_results_file(imgs, all_boxes, res_file)
+    # Only do evaluation on non-test sets
+    #if self._image_set.find('test') == -1:
+    #    self._do_detection_eval(res_file, output_dir)
+    # Optionally cleanup results json file
+    #if self.config['cleanup']:
+    #    os.remove(res_file)
+
+    return res_file

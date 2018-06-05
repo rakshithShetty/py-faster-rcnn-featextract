@@ -10,18 +10,17 @@
 """Test a Fast R-CNN network on an image database."""
 
 import _init_paths
-from fast_rcnn.test import test_net
+from fast_rcnn.test import test_net, test_net_new
 from fast_rcnn.config import cfg, cfg_from_file, cfg_from_list
 from datasets.factory import get_imdb
 import caffe
 import argparse
 import pprint
 import time, os, sys
+import json
 
-def parse_args():
-    """
-    Parse input arguments
-    """
+
+def define_parser():
     parser = argparse.ArgumentParser(description='Test a Fast R-CNN network')
     parser.add_argument('--gpu', dest='gpu_id', help='GPU id to use',
                         default=0, type=int)
@@ -49,6 +48,21 @@ def parse_args():
     parser.add_argument('--num_dets', dest='max_per_image',
                         help='max number of detections per image',
                         default=100, type=int)
+    parser.add_argument('--json', dest='json_name',
+                        help='input specification',
+                        default=None, type=str)
+    parser.add_argument('--output_dir', dest='output_dir',
+                        help='output directory specification',
+                        default=None, type=str)
+
+    return parser
+
+
+def parse_args():
+    """
+    Parse input arguments
+    """
+    parser = define_parser()
 
     if len(sys.argv) == 1:
         parser.print_help()
@@ -57,9 +71,8 @@ def parse_args():
     args = parser.parse_args()
     return args
 
-if __name__ == '__main__':
-    args = parse_args()
 
+def main(args):
     print('Called with args:')
     print(args)
 
@@ -87,4 +100,19 @@ if __name__ == '__main__':
     if not cfg.TEST.HAS_RPN:
         imdb.set_proposal_method(cfg.TEST.PROPOSAL_METHOD)
 
-    test_net(net, imdb, max_per_image=args.max_per_image, vis=args.vis)
+    with open(args.json_name) as f:
+        imgs = json.load(f)
+
+    return test_net_new(net, imdb, imgs, args.output_dir, max_per_image=args.max_per_image, vis=args.vis)
+
+
+def call_with_args(list_args):
+    parser = define_parser()
+    args = parser.parse_args(list_args)
+    output_file = main(args)
+    return output_file
+
+
+if __name__ == '__main__':
+    args = parse_args()
+    main(args)

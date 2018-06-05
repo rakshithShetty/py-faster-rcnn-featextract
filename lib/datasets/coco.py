@@ -102,7 +102,9 @@ class coco(imdb):
     
     def _get_sizes(self):
         anns = self._COCO.loadImgs(self._image_index)
+        #print('AAA', anns[0])
         szs = [(ann['width'], ann['height']) for ann in anns]
+        #szs = [(640,480) for ann in anns]
         return szs
 
     def image_path_at(self, i):
@@ -115,6 +117,7 @@ class coco(imdb):
         """
         Construct an image path from the image's "index" identifier.
         """
+        print(index)
         # Example image path for index=119993:
         #   images/train2014/COCO_train2014_000000119993.jpg
         if 'lsmdc' in self._image_set:
@@ -127,6 +130,10 @@ class coco(imdb):
             file_name = (str(int(index//1e6))+':'+str(int(index%1e6))+ '.jpeg')
         elif 'social' in self._image_set:
             file_name = osp.join(self._image_set.split('-')[-1], index+'.jpg' )
+        elif 'wmt18' in self._image_set:
+            file_name = index
+        elif 'smb' in self._image_set:
+            file_name = index
         else:
             file_name = ('COCO_' + self._data_name + '_' +
                          str(index).zfill(12) + '.jpg')
@@ -134,6 +141,7 @@ class coco(imdb):
                               self._data_name, file_name)
         assert osp.exists(image_path), \
                 'Path does not exist: {}'.format(image_path)
+        print(image_path)
         return image_path
 
     def selective_search_roidb(self):
@@ -353,7 +361,7 @@ class coco(imdb):
         results = []
         for im_ind, index in enumerate(self.image_index):
             dets = boxes[im_ind].astype(np.float)
-            if dets == []:
+            if dets.size == 0 or dets == []:
                 continue
             scores = dets[:, -1]
             xs = dets[:, 0]
