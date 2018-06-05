@@ -319,17 +319,9 @@ def create_json(route):
 
 def create_commandline_args(args, tmp_file_route):
     command_args = []
-    if True:
-        command_args.append('--def')
-        command_args.append('../models/coco/VGG16/faster_rcnn_end2end/test.prototxt')
-        command_args.append('--net')
-        command_args.append('../coco80Cls_vgg16_faster_rcnn_iter_290000.caffemodel')
-        command_args.append('--cfg')
-        command_args.append('../experiments/cfgs/faster_rcnn_end2end.yml')
-    else:
-        for k, v in args.items():
-            command_args.append('--' + k)
-            command_args.append(v)
+    for k, v in args.items():
+        command_args.append('--' + k)
+        command_args.append(v)
     command_args.append('--output')
     command_args.append(os.path.abspath('../output/featExtract/coco_2015_test-smb/coco80Cls_vgg16_faster_rcnn_iter_290000/'))# + 'detections_' + 'test-smb2015' + '_results.json'))
     command_args.append('--gpu')
