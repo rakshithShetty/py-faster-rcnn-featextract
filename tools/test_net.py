@@ -51,8 +51,8 @@ def define_parser():
     parser.add_argument('--json', dest='json_name',
                         help='input specification',
                         default=None, type=str)
-    parser.add_argument('--output_dir', dest='output_dir',
-                        help='output directory specification',
+    parser.add_argument('--tpm', dest='tmp_dir',
+                        help='temporal directory specification',
                         default=None, type=str)
 
     return parser
@@ -103,14 +103,14 @@ def main(args):
     with open(args.json_name) as f:
         imgs = json.load(f)
 
-    return test_net_new(net, imdb, imgs, args.output_dir, max_per_image=args.max_per_image, vis=args.vis)
+    return test_net_new(net, imdb, imgs, args.tmp_dir, max_per_image=args.max_per_image, vis=args.vis)
 
 
 def call_with_args(list_args):
     parser = define_parser()
     args = parser.parse_args(list_args)
-    output_file = main(args)
-    return output_file
+    tmp_file = main(args)
+    return tmp_file
 
 
 if __name__ == '__main__':

@@ -322,8 +322,6 @@ def create_commandline_args(args, tmp_file_route):
     for k, v in args.items():
         command_args.append('--' + k)
         command_args.append(v)
-    command_args.append('--output')
-    command_args.append(os.path.abspath('../output/featExtract/coco_2015_test-smb/coco80Cls_vgg16_faster_rcnn_iter_290000/'))# + 'detections_' + 'test-smb2015' + '_results.json'))
     command_args.append('--gpu')
     command_args.append('0')
     command_args.append('--imdb')
