@@ -51,7 +51,7 @@ def define_parser():
     parser.add_argument('--json', dest='json_name',
                         help='input specification',
                         default=None, type=str)
-    parser.add_argument('--tpm', dest='tmp_dir',
+    parser.add_argument('--tmp', dest='tmp_dir',
                         help='temporal directory specification',
                         default=None, type=str)
 
