@@ -180,9 +180,9 @@ def parse_args():
     parser.add_argument('-o', dest='resFile', type=str,
                         default='dummpy.npy',
                         help='detections json file')
-    parser.add_argument('--imdb', dest='imdb_name',
-                        type=str, default='coco_2014_train',
-                        help='Which database was this run on')
+    # parser.add_argument('--imdb', dest='imdb_name',
+    #                     type=str, default='coco_2014_train',
+    #                     help='Which database was this run on')
     parser.add_argument('--nsave', dest='nsave',
                         type=int, default=100,
                         help='How many images to write into pdf')
@@ -222,7 +222,8 @@ if __name__ == '__main__':
     args = parse_args()
     cfg.USE_GPU_NMS = False
 
-    imdb = get_imdb(args.imdb_name)
+    #imdb = get_imdb(args.imdb_name)
+    imdb = get_imdb('coco_2015_test-smb')
 
     if args.usecococls != 0:
         CLASSES = imdb.classes
