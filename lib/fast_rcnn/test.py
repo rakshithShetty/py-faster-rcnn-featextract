@@ -367,6 +367,9 @@ def test_net_new(net, imdb, imgs, output_dir, max_per_image=100, thresh=0.05, vi
               .format(i + 1, num_images, _t['im_detect'].average_time,
                       _t['misc'].average_time)
 
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+
     det_file = os.path.join(output_dir, 'detections.pkl')
     with open(det_file, 'wb') as f:
         cPickle.dump(all_boxes, f, cPickle.HIGHEST_PROTOCOL)

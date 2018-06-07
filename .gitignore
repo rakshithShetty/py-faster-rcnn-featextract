@@ -1,3 +1,11 @@
 *.pyc
 .ipynb_checkpoints
 lib/build
+
+coco80Cls_vgg16_faster_rcnn_iter_290000.caffemodel
+data/coco/
+labels.txt
+output/
+tools/bsoutput/
+tools/test_net_stub.py
+trainedModels

@@ -322,16 +322,16 @@ def create_commandline_args(args, tmp_file_route):
     for k, v in args.items():
         command_args.append('--' + k)
         command_args.append(v)
-    command_args.append('--gpu')
-    command_args.append('0')
-    command_args.append('--imdb')
-    command_args.append('coco_2015_test-smb')
+    command_args.append('--gpu')#put in file?
+    command_args.append('0')#put in file?
+    command_args.append('--imdb')#deprecated
+    command_args.append('coco_2015_test-smb')#deprecated
     command_args.append('--json')
     command_args.append(tmp_file_route)
-    command_args.append('--comp')
-    command_args.append('--set')
-    command_args.append('EXP_DIR')
-    command_args.append('featExtract')
+    command_args.append('--comp')#deprecated?
+    command_args.append('--set')#deprecated
+    command_args.append('EXP_DIR')#deprecated
+    command_args.append('featExtract')#deprecated
 
     return command_args
 
@@ -351,6 +351,8 @@ def change_output(inpt, output_file_route):
 
         o['image_index'] = i['image_index']
         o['image_id'] = i['image_id']
+        o['height'] = i['height']
+        o['width'] = i['width']
 
     with open(output_file_route, 'w') as f:
         json.dump(output, f)
