@@ -3,6 +3,7 @@ def=/u/79/lariah1/unix/picsom/python/py-faster-rcnn-featextract/models/coco/VGG1
 net=/u/79/lariah1/unix/picsom/python/py-faster-rcnn-featextract/coco80Cls_vgg16_faster_rcnn_iter_290000.caffemodel
 cfg=/u/79/lariah1/unix/picsom/python/py-faster-rcnn-featextract/experiments/cfgs/faster_rcnn_end2end.yml
 tmp=/u/79/lariah1/unix/picsom/python/py-faster-rcnn-featextract/tools/theoutput/
+cat=./categories.json
 
 #../output/featExtract/coco_2015_test-smb/coco80Cls_vgg16_faster_rcnn_iter_290000/detections_test-smb2015_results.json
 #--imdb coco_2015_test-smb

@@ -53,7 +53,7 @@ def define_parser():
                         default=None, type=str)
     parser.add_argument('--tmp', dest='tmp_dir',
                         help='temporal directory specification',
-                        default=None, type=str)
+                        default='output', type=str)
 
     return parser
 

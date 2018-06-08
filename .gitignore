@@ -6,6 +6,6 @@ coco80Cls_vgg16_faster_rcnn_iter_290000.caffemodel
 data/coco/
 labels.txt
 output/
-tools/bsoutput/
+tools/theoutput/
 tools/test_net_stub.py
 trainedModels
