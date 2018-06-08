@@ -158,7 +158,6 @@ if __name__ == '__main__':
     CONF_THRESH = 0.8
 
     if args.dump_class_only == 1:
-        pass
         dump_clasDetFeat(detections, catToIdx, args, lenlbls)
     else:
         detDict = defaultdict(list)
