@@ -298,10 +298,8 @@ def test_net(net, imdb, max_per_image=100, thresh=0.05, vis=False):
     print 'Evaluating detections'
     imdb.evaluate_detections(all_boxes, output_dir)
 
-    return output_dir
 
-
-def test_net_new(net, imdb, imgs, output_dir, max_per_image=100, thresh=0.05, vis=False):
+def test_net_without_db(net, imgs, output_dir, max_per_image=100, thresh=0.05, vis=False):
     """Test a Fast R-CNN network on an image database."""
     num_images = len(imgs['images'])
     imgs['classes'] = [i['name'] for i in imgs['categories']]
@@ -319,19 +317,10 @@ def test_net_new(net, imdb, imgs, output_dir, max_per_image=100, thresh=0.05, vi
     _t = {'im_detect' : Timer(), 'misc' : Timer()}
 
     if not cfg.TEST.HAS_RPN:
-        roidb = imdb.roidb
+        raise Exception('imdb.roidb needed')
 
     for i, im_dict in enumerate(imgs['images']):
-        # filter out any ground truth boxes
-        if cfg.TEST.HAS_RPN:
-            box_proposals = None
-        else:
-            # The roidb may contain ground-truth rois (for example, if the roidb
-            # comes from the training or val split). We only want to evaluate
-            # detection on the *non*-ground-truth rois. We select those the rois
-            # that have the gt_classes field set to 0, which means there's no
-            # ground truth.
-            box_proposals = roidb[i]['boxes'][roidb[i]['gt_classes'] == 0]
+        box_proposals = None
 
         im = cv2.imread(im_dict['image_id'])
         _t['im_detect'].tic()
@@ -375,8 +364,7 @@ def test_net_new(net, imdb, imgs, output_dir, max_per_image=100, thresh=0.05, vi
         cPickle.dump(all_boxes, f, cPickle.HIGHEST_PROTOCOL)
 
     print 'Evaluating detections'
-    #imdb.evaluate_detections(all_boxes, output_dir)
-    output_file = evaluate_detections(imgs, all_boxes, output_dir)
+    output_file = _evaluate_detections(imgs, all_boxes, output_dir)
 
     return output_file
 
@@ -421,7 +409,7 @@ def _write_coco_results_file(imgs, all_boxes, res_file):
         json.dump(results, fid)
 
 
-def evaluate_detections(imgs, all_boxes, output_dir):
+def _evaluate_detections(imgs, all_boxes, output_dir):
     res_file = osp.join(output_dir, ('detections_' +
                                      #self._image_set +
                                      #self._year +

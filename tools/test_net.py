@@ -10,7 +10,7 @@
 """Test a Fast R-CNN network on an image database."""
 
 import _init_paths
-from fast_rcnn.test import test_net, test_net_new
+from fast_rcnn.test import test_net, test_net_without_db
 from fast_rcnn.config import cfg, cfg_from_file, cfg_from_list
 from datasets.factory import get_imdb
 import caffe
@@ -103,7 +103,7 @@ def main(args):
     with open(args.json_name) as f:
         imgs = json.load(f)
 
-    return test_net_new(net, imdb, imgs, args.tmp_dir, max_per_image=args.max_per_image, vis=args.vis)
+    return test_net_without_db(net, imgs, args.tmp_dir, max_per_image=args.max_per_image, vis=args.vis)
 
 
 def call_with_args(list_args):
