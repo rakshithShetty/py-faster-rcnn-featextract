@@ -153,7 +153,10 @@ if __name__ == '__main__':
 
     cat_idx = sorted(list(set([c['id'] for c in categories])))
     catToIdx = dict(zip(cat_idx, range(len(cat_idx))))
-    lenlbls = max([d['image_index'] for d in detections]) + 1
+    iilist = [d['image_index'] for d in detections]
+    lenlbls = 1
+    if len(iilist):
+        lenlbls = max(iilist) + 1
 
     CONF_THRESH = 0.8
 
